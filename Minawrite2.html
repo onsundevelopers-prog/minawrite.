@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minawrite</title>
+
+<style>
+  html {
+    background-color: black;
+    color: white;
+    font-family: system-ui, monospace;
+  }
+
+  body {
+    margin: 0;
+    overflow-x: hidden;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+    z-index: 10;
+    transition: background 0.3s ease;
+  }
+
+  header:hover { background: rgba(0,0,0,0.95); }
+
+  ul {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    position: relative;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.2s ease;
+  }
+
+  li::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0;
+    height: 2px;
+    background: cyan;
+    transition: width 0.3s ease;
+  }
+
+  li:hover {
+    color: cyan;
+    transform: translateY(-3px);
+  }
+
+  li:hover::after { width: 100%; }
+
+  h1 {
+    font-family: 'Gill Sans', sans-serif;
+    margin: 0;
+    font-size: 2rem;
+    transition: font-size 0.2s ease, color 0.3s ease, transform 0.3s ease;
+  }
+
+  h1:hover {
+    font-size: 2.4rem;
+    transform: scale(1.05);
+    color: cyan;
+  }
+
+  .herosection {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    height: 100vh;
+    padding: 5rem 2rem;
+    font-family: 'Gill Sans', sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .herosection h1 {
+    font-size: 8rem;
+    margin: 0;
+    position: relative;
+    animation: float 4s ease-in-out infinite;
+    transition: color 0.3s ease, transform 0.3s ease;
+  }
+
+  .herosection:hover h1 { color: cyan; transform: scale(1.05); }
+
+  .herosection::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 2rem;
+    width: 0;
+    height: 5px;
+    background-color: cyan;
+    transition: width 0.5s ease, left 0.5s ease;
+  }
+
+  .herosection:hover::after { width: 50%; left: 25%; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+
+  .bentogrid, .bentogrid2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2rem;
+    padding: 4rem 2rem;
+  }
+
+  .bentobox { background: #222; height: 150px; border-radius: 8px; transform: translateY(20px); opacity: 0; animation: fadeInUp 0.8s forwards; }
+  .bentobox:nth-child(1) { animation-delay: 0.1s; }
+  .bentobox:nth-child(2) { animation-delay: 0.3s; }
+  .bentobox:nth-child(3) { animation-delay: 0.5s; }
+  .bentobox:nth-child(4) { animation-delay: 0.7s; }
+
+  .bentobox2 { background: #333; height: 150px; border-radius: 8px; transform: translateY(20px); opacity: 0; animation: fadeInUp 0.8s forwards; }
+  .bentobox2:nth-child(1) { animation-delay: 0.1s; }
+  .bentobox2:nth-child(2) { animation-delay: 0.3s; }
+  .bentobox2:nth-child(3) { animation-delay: 0.5s; }
+  .bentobox2:nth-child(4) { animation-delay: 0.7s; }
+
+  @keyframes fadeInUp { to { transform: translateY(0); opacity: 1; } }
+
+  footer {
+    height: 80px;
+    background: #111;
+    transition: background 0.3s ease;
+  }
+
+  footer:hover { background: #222; }
+
+  #cursor {
+    position: fixed;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: cyan;
+    mix-blend-mode: screen;
+    transform: translate(-50%, -50%);
+    transition: transform 0.05s ease, box-shadow 0.2s ease;
+    z-index: 9999;
+  }
+
+  li:hover ~ #cursor, .herosection:hover ~ #cursor { box-shadow: 0 0 15px cyan, 0 0 30px cyan; }
+
+  .write {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem;
+  }
+
+  .write button {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    border: none;
+    background: cyan;
+    color: black;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .write button:hover { transform: scale(1.05); box-shadow: 0 0 10px cyan, 0 0 20px cyan; }
+
+  /* Monospace animated texts */
+  #smallanimatedtypedtext, #smallanimatedtypedtextforBookospace,
+  #smallanimatedtypedtext small, #smallanimatedtypedtextforBookospace small {
+    font-family: monospace !important;
+    color: #aaa;
+    font-size: 0.9rem;
+    max-width: 600px;
+    animation-duration: 3.5s;
+    animation-iteration-count: infinite;
+  }
+
+  #smallanimatedtypedtext::after, #smallanimatedtypedtextforBookospace::after {
+    content: '|';
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  textarea { font-family: monospace; width: 100%; background: #222; color: white; border: none; border-radius: 8px; padding: 1rem; resize: vertical; }
+
+  button { margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 5px; border: none; background: cyan; color: black; cursor: pointer; }
+
+  #savedNotes p, #savedBookoSpace p { background: #222; padding: 0.5rem; border-radius: 5px; margin-top: 0.5rem; }
+
+  .learnanewfact {
+    padding: 2rem;
+    color: #333;
+    font-family: monospace;
+    background: black;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+  }
+  .learnanewfact h6 {
+    animation: blink 1s infinite;
+  }
+
+  @keyframes changeColor {
+    0% { color: #333 }
+    50% { color: #222 }
+    100% { color: #333}
+  }
+  .herosection p {
+    color: #333;
+    animation: changeColor 6s infinite;
+    font-family: Monospace;
+    font-size: 1.2rem;
+  }
+  @keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+
+  /* Subscribe Section */
+  .subscribehere {
+    max-width: 520px;
+    margin: 6rem auto;
+    padding: 2.5rem 2rem;
+    background: #0e0e0e;
+    border-radius: 12px;
+    border: 1px solid #222;
+    text-align: center;
+    font-family: monospace;
+  }
+
+  .subscribehere h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.6rem;
+    color: white;
+    letter-spacing: 0.5px;
+  }
+
+  /* Email input */
+  #emailinput {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: #151515;
+    color: white;
+    border-radius: 6px;
+    border: 1px solid #2a2a2a;
+    font-family: monospace;
+    outline: none;
+    transition: border 0.25s ease;
+  }
+
+  #emailinput::placeholder { color: #666; }
+  #emailinput:focus { border-color: cyan; }
+
+  /* Subscribe button */
+  #subscribebutton {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 0.75rem;
+    background: #111;
+    color: cyan;
+    border-radius: 6px;
+    border: 1px solid cyan;
+    font-family: monospace;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease;
+  }
+
+  #subscribebutton:hover { background: cyan; color: black; transform: translateY(-2px); }
+  #subscribebutton:active { transform: translateY(0); }
+
+  #subscriptionmessage { margin-top: 1rem; font-size: 0.85rem; color: #aaa; }
+  @keyframes hexagonspin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+</style>
+</head>
+
+<body>
+<div id="cursor"></div>
+
+<header>
+  <ul class="nav-left">
+    <li>Home</li>
+    <li>Write</li>
+  </ul>
+  <h1>Minawrite</h1>
+  <ul class="nav-right">
+    <li>History</li>
+    <li>Coming Soon</li>
+  </ul>
+</header>
+<script>
+  const comingsoon = document.querySelectorAll('.nav-right li')[1];
+  comingsoon.addEventListener('click', () => { alert('Coming Soon!'); });
+</script>
+
+<div class="herosection">
+  <i class="fa-solid fa-hexagon"></i>
+  </script>
+  <h1>Minawrite</h1>
+  <p>For students and young entrepreneurs, ideas move fast — faster than notebooks, 
+    faster than scattered apps. Minawrite is built for thinkers who are learning, building, 
+    and creating at the same time. Whether you’re outlining a startup idea, drafting a project, 
+    journaling your growth, or writing your first real plan, 
+    Minawrite gives you a focused space to turn thoughts into action. No distractions. 
+    No clutter. Just a place to write, refine, and move forward. - Ose </p>
+</div>
+
+<script>
+fetch('https://worldtimeapi.org/api/ip')
+.then(response => response.json())
+.then(data => {
+  const dateTimeString = data.datetime;
+  const date = new Date(dateTimeString);
+  const hours = date.getHours().toString().padStart(2,'0');
+  const minutes = date.getMinutes().toString().padStart(2,'0');
+  const seconds = date.getSeconds().toString().padStart(2,'0');
+  const timeString = `${hours}:${minutes}:${seconds}`;
+  const timeElement = document.createElement('h1');
+  timeElement.textContent = timeString;
+  document.querySelector('.herosection').appendChild(timeElement);
+})
+.catch(error => console.error('Error fetching time:', error));
+</script>
+
+<div class="write">
+  <p>Start writing now</p>
+  <button id="goToNotes">Go to Notes</button>
+</div>
+
+<div class="bentogrid">
+  <div class="bentobox"></div>
+  <div class="bentobox"></div>
+  <div class="bentobox"></div>
+  <div class="bentobox"></div>
+</div>
+
+<div class="bentogrid2">
+  <div class="bentobox2"></div>
+  <div class="bentobox2"></div>
+  <div class="bentobox2"></div>
+  <div class="bentobox2"></div>
+</div>
+
+<!-- Notes Section -->
+<section id="notes-section" style="padding: 4rem 2rem; background:#111; min-height:50vh;">
+  <h2>Your Notes</h2>
+  <div id="smallanimatedtypedtext">
+    <small>
+      With Minawrite, you can jot down your thoughts and ideas seamlessly. 
+      Use the text area below to write your notes and click "Save Note" to 
+      keep them handy for later reference.
+    </small>
+  </div>
+  <textarea id="noteArea" rows="10"></textarea>
+  <button id="saveNote">Save Note</button>
+  <button id="DownloadNote">Download Note</button>
+  <div id="savedNotes"></div>
+  <p>sometimes it could be hard to know what to write here is an idea:</p>
+  <script>
+    fetch("https://api.quotable.io/random")
+      .then(res => res.json())
+      .then(data => {
+        const quoteParagraph = document.createElement('p');
+        quoteParagraph.textContent = `"${data.content}" — ${data.author}`;
+        document.getElementById('notes-section').appendChild(quoteParagraph);
+      })
+      .catch(err => console.error("Quote API error:", err));
+  </script>
+</section>
+
+<!-- Bookospace Section -->
+<section id="bookospace-section" style="padding: 4rem 2rem; background:#111; min-height:50vh;">
+  <h2>Bookospace</h2>
+  <div id="smallanimatedtypedtextforBookospace">
+    <small>
+      Writing could be difficult. You may need more than just note space; 
+      our Bookospace allows you to write a full book.
+    </small>
+  </div>
+  <textarea id="bookospace" rows="10"></textarea>
+  <button id="saveBookoSpace">Save Book</button>
+  <div id="savedBookoSpace"></div>
+  <p>sometimes it could be hard to know what to write, and im talking about books this time </p>
+  <div id="writingPrompt"></div>
+  <script>
+    fetch('https://corsproxy.io/?https://www.reddit.com/r/WritingPrompts/top.json?limit=5&t=day')
+      .then(res => res.json())
+      .then(data => {
+        const prompts = data.data.children;
+        const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)].data.title;
+        const promptParagraph = document.createElement('p');
+        promptParagraph.textContent = `Writing Prompt: "${randomPrompt}"`;
+        document.getElementById('bookospace-section').appendChild(promptParagraph);
+      })
+      .catch(err => console.error('Error fetching writing prompt:', err));
+  </script>
+</section>
+
+<div class="learnanewfact">
+  <h3>Learn a New Fact/!</h3>
+  <p>Did you know..</p>
+  <h6>|</h6>
+  <script>
+    fetch('https://uselessfacts.jsph.pl/random.json?language=en')
+      .then(response => response.json())
+      .then(data => {
+        const factParagraph = document.createElement('p');
+        factParagraph.textContent = data.text;
+        document.querySelector('.learnanewfact').appendChild(factParagraph);
+      })
+      .catch(error => console.error('Error fetching fact:', error));
+  </script>
+</div>
+
+<div class="subscribehere">
+  <h2>Subscribe to our Newsletter</h2>
+  <input type="email" id="emailinput" placeholder="Enter your email" />
+  <button id="subscribebutton">Subscribe</button>
+  <div id="subscriptionmessage" style="margin-top:1rem; color:cyan;"></div>
+</div>
+
+<footer></footer>
+
+<script>
+  // Scroll to Notes
+  const button = document.getElementById("goToNotes");
+  const notesSection = document.getElementById("notes-section");
+  button.addEventListener("click", () => {
+    notesSection.scrollIntoView({ behavior: "smooth" });
+  });
+
+  // Save Notes
+  const saveButton = document.getElementById("saveNote");
+  const noteArea = document.getElementById("noteArea");
+  const savedNotes = document.getElementById("savedNotes");
+  const DownloadNoteButton = document.getElementById("DownloadNote");
+  saveButton.addEventListener("click", () => {
+    if(noteArea.value.trim() !== "") {
+      const p = document.createElement("p");
+      p.textContent = noteArea.value;
+      savedNotes.appendChild(p);
+      noteArea.value = "";
+    }
+  });
+
+  // Download Notes
+  DownloadNoteButton.addEventListener("click", () => {
+    const text = Array.from(savedNotes.children).map(p => p.textContent).join("\n\n");
+    if (!text) { alert("No notes to download."); return; }
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "minawrite-notes.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Save Bookospace
+  const saveBookoButton = document.getElementById("saveBookoSpace");
+  const bookospaceArea = document.getElementById("bookospace");
+  const savedBookoSpace = document.getElementById("savedBookoSpace");
+  saveBookoButton.addEventListener("click", () => {
+    if(bookospaceArea.value.trim() !== "") {
+      const p = document.createElement("p");
+      p.textContent = bookospaceArea.value;
+      savedBookoSpace.appendChild(p);
+      bookospaceArea.value = "";
+    }
+  });
+
+  // Newsletter subscription
+  const subscribebutton = document.getElementById("subscribebutton");
+  const emailinput = document.getElementById("emailinput");
+  const subscriptionmessage = document.getElementById("subscriptionmessage");
+  subscribebutton.addEventListener("click", () => {
+    const email = emailinput.value;
+    if(email.includes("@")) {
+      subscriptionmessage.textContent = "Thank you for subscribing!";
+      emailinput.value = "";
+    } else {
+      subscriptionmessage.textContent = "Please enter a valid email address.";
+    }
+  });
+
+  // History functionality
+  const historyLink = document.querySelectorAll('.nav-left li')[1];
+  historyLink.addEventListener('click', () => {
+    const allNotes = Array.from(document.querySelectorAll('#savedNotes p')).map(p => p.textContent);
+    const allBooks = Array.from(document.querySelectorAll('#savedBookoSpace p')).map(p => p.textContent);
+    const historyData = { notes: allNotes, books: allBooks, timestamp: new Date().toLocaleString() };
+    if (allNotes.length === 0 && allBooks.length === 0) {
+      alert('No history available yet. Start writing!');
+    } else {
+      alert('Your History:\n\nNotes: ' + allNotes.length + '\nBooks: ' + allBooks.length + '\n\nLast updated: ' + historyData.timestamp);
+    }
+  });
+</script>
+</body>
+<footer>Focus Playlist: Now PLaying</footer>
+<script>
+  fetch('https://api.example.com/playlist')
+    .then(response => response.json())
+    .then(data => {
+      const footer = document.querySelector('footer');
+      footer.textContent = `Focus Playlist: Now Playing - ${data.currentTrack}`;
+    })
+    .catch(error => console.error('Error fetching playlist:', error));
+</script>
+</html>
